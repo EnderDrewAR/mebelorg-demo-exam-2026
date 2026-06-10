@@ -15,16 +15,22 @@
 
 ## Быстрый запуск
 
-Откройте PowerShell в корне проекта и выполните:
+Откройте PowerShell в корне проекта. Один раз выполните установку:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
-.\start.ps1
+.\setup.ps1
 ```
 
-При первом запуске введите пароль пользователя PostgreSQL `postgres`.
+Скрипт рассчитан на экзаменационные настройки PostgreSQL:
 
-Скрипт автоматически:
+- пользователь `postgres`;
+- пароль `postgres`;
+- сервер `localhost`;
+- порт `5432`;
+- база `furniture_demo`.
+
+Установочный скрипт автоматически:
 
 1. Найдет PostgreSQL 16.
 2. Подключится к `localhost:5432`.
@@ -33,32 +39,21 @@ Set-ExecutionPolicy -Scope Process Bypass
 5. Установит зависимости через `uv`.
 6. Применит миграции.
 7. Импортирует данные из CSV и подготовит изображения.
-8. Запустит сайт на <http://127.0.0.1:8000>.
 
-Остановка сервера: `Ctrl+C`.
+После успешной установки `setup.ps1` можно удалить.
 
-## Другое имя базы
+Запуск проекта:
 
 ```powershell
-.\start.ps1 -DbName db_furniture
+uv run python src/manage.py runserver
 ```
 
-Другой пользователь, адрес или порт PostgreSQL:
+Откройте <http://127.0.0.1:8000>. Остановка сервера: `Ctrl+C`.
+
+Повторный запуск выполняется той же командой:
 
 ```powershell
-.\start.ps1 -DbUser postgres -DbHost localhost -DbPort 5432
-```
-
-Повторно запросить пароль и перезаписать `.env`:
-
-```powershell
-.\start.ps1 -ResetConfig
-```
-
-Проверить подключение, миграции и импорт без запуска сервера:
-
-```powershell
-.\start.ps1 -CheckOnly
+uv run python src/manage.py runserver
 ```
 
 ## Структура
@@ -80,7 +75,7 @@ mebelorg_demo/
 ├── seed_media/             # Исходные изображения товаров
 ├── pyproject.toml          # Python-зависимости
 ├── uv.lock                 # Зафиксированные версии зависимостей
-└── start.ps1               # Единая команда запуска
+└── setup.ps1               # Одноразовая подготовка проекта
 ```
 
 Папки `.venv`, `media` и файл `.env` создаются локально и в архив не входят.
@@ -111,7 +106,7 @@ mebelorg_demo/
 
 ## Проверка
 
-Сначала выполните `.\start.ps1 -CheckOnly`, затем:
+Проверка после установки:
 
 ```powershell
 uv run python src/manage.py test furniture
