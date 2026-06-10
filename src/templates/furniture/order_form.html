@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — МебельОрг{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div>
+        <a class="back-link" href="{% url 'order_list' %}">← Назад к заказам</a>
+        <h1>{{ title }}</h1>
+    </div>
+</div>
+<form method="post" class="edit-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-grid">
+        {% for field in form %}
+            <div class="field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Товары заказа</h2>
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}<div class="form-errors">{{ formset.non_form_errors }}</div>{% endif %}
+    <div class="order-items">
+        {% for item_form in formset %}
+            <div class="order-item-form">
+                {{ item_form.id }}
+                <div class="field">
+                    <label for="{{ item_form.product.id_for_label }}">Артикул товара</label>
+                    {{ item_form.product }}
+                    {{ item_form.product.errors }}
+                </div>
+                <div class="field">
+                    <label for="{{ item_form.quantity.id_for_label }}">Количество</label>
+                    {{ item_form.quantity }}
+                    {{ item_form.quantity.errors }}
+                </div>
+                {% if item_form.instance.pk %}
+                    <div class="delete-check">{{ item_form.DELETE }} <label for="{{ item_form.DELETE.id_for_label }}">Удалить позицию</label></div>
+                {% endif %}
+                {{ item_form.non_field_errors }}
+            </div>
+        {% endfor %}
+    </div>
+    <div class="form-actions">
+        <button class="button button-primary" type="submit">Сохранить</button>
+        <a class="button button-secondary" href="{% url 'order_list' %}">Отмена</a>
+    </div>
+</form>
+{% endblock %}
+

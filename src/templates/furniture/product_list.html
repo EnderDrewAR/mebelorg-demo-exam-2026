@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Товары — МебельОрг{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div>
+        <h1>Список товаров</h1>
+        <p>Актуальные остатки и цены магазина.</p>
+    </div>
+    {% if is_app_admin %}
+        <a class="button button-primary" href="{% url 'product_create' %}">Добавить товар</a>
+    {% endif %}
+</div>
+
+{% if can_manage_catalog %}
+<form class="filter-panel" method="get" data-live-filter>
+    <div class="field">
+        <label for="search">Поиск</label>
+        <input id="search" name="q" type="search" value="{{ query }}" placeholder="Артикул, название, категория...">
+    </div>
+    <div class="field">
+        <label for="discount">Скидка</label>
+        <select id="discount" name="discount">
+            <option value="all" {% if discount_range == "all" %}selected{% endif %}>Все диапазоны</option>
+            <option value="0-10" {% if discount_range == "0-10" %}selected{% endif %}>0–10,99%</option>
+            <option value="11-14" {% if discount_range == "11-14" %}selected{% endif %}>11–14,99%</option>
+            <option value="15+" {% if discount_range == "15+" %}selected{% endif %}>15% и более</option>
+        </select>
+    </div>
+    <div class="field">
+        <label for="sort">Сортировка</label>
+        <select id="sort" name="sort">
+            <option value="" {% if not sort %}selected{% endif %}>Без сортировки</option>
+            <option value="price_asc" {% if sort == "price_asc" %}selected{% endif %}>Цена: по возрастанию</option>
+            <option value="price_desc" {% if sort == "price_desc" %}selected{% endif %}>Цена: по убыванию</option>
+            <option value="stock_asc" {% if sort == "stock_asc" %}selected{% endif %}>Остаток: по возрастанию</option>
+            <option value="stock_desc" {% if sort == "stock_desc" %}selected{% endif %}>Остаток: по убыванию</option>
+        </select>
+    </div>
+    <noscript><button class="button button-primary" type="submit">Применить</button></noscript>
+</form>
+{% endif %}
+
+<section class="product-list">
+    {% for product in products %}
+        <article class="product-card {% if product.stock_quantity == 0 %}product-out{% elif product.discount > 15 %}product-discount{% endif %}">
+            <div class="product-image">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{% static 'img/picture.png' %}" alt="Изображение отсутствует">
+                {% endif %}
+            </div>
+            <div class="product-info">
+                <div class="product-title-row">
+                    <div>
+                        <span class="article">{{ product.article }}</span>
+                        <h2>{{ product.name }}</h2>
+                    </div>
+                    {% if is_app_admin %}
+                        <div class="card-actions">
+                            <a href="{% url 'product_update' product.pk %}">Редактировать</a>
+                            <a class="danger-link" href="{% url 'product_delete' product.pk %}">Удалить</a>
+                        </div>
+                    {% endif %}
+                </div>
+                <p>{{ product.description }}</p>
+                <dl class="product-meta">
+                    <div><dt>Категория</dt><dd>{{ product.category.name }}</dd></div>
+                    <div><dt>Производитель</dt><dd>{{ product.manufacturer.name }}</dd></div>
+                    <div><dt>Поставщик</dt><dd>{{ product.supplier.name }}</dd></div>
+                    <div><dt>Остаток</dt><dd>{{ product.stock_quantity }} {{ product.unit.name }}</dd></div>
+                    <div><dt>Скидка</dt><dd>{{ product.discount|floatformat:2 }}%</dd></div>
+                </dl>
+            </div>
+            <div class="price-block">
+                {% if product.discount > 0 %}
+                    <span class="old-price">{{ product.price|floatformat:2 }} ₽</span>
+                    <strong>{{ product.discounted_price|floatformat:2 }} ₽</strong>
+                {% else %}
+                    <strong>{{ product.price|floatformat:2 }} ₽</strong>
+                {% endif %}
+            </div>
+        </article>
+    {% empty %}
+        <div class="empty-state">Товары по выбранным условиям не найдены.</div>
+    {% endfor %}
+</section>
+{% endblock %}
+

@@ -1,0 +1,55 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}МебельОрг{% endblock %}</title>
+    <link rel="icon" href="{% static 'img/icon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <script src="{% static 'js/app.js' %}" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{% url 'product_list' %}">
+            <img src="{% static 'img/logo.png' %}" alt="Логотип МебельОрг">
+            <span>МебельОрг</span>
+        </a>
+        {% if user.is_authenticated %}
+            <nav class="main-nav" aria-label="Основная навигация">
+                <a href="{% url 'product_list' %}">Товары</a>
+                {% if is_manager or is_app_admin %}
+                    <a href="{% url 'order_list' %}">Заказы</a>
+                {% endif %}
+            </nav>
+            <div class="user-panel">
+                <strong>{{ user.get_full_name }}</strong>
+                <span>{{ user.role.name }}</span>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button class="link-button" type="submit">Выйти</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="user-panel">
+                <span>Гость</span>
+                {% if request.resolver_match.url_name != "login" %}
+                    <a href="{% url 'login' %}">Войти</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </header>
+
+    <main class="page">
+        {% if messages %}
+            <section class="messages" aria-live="polite">
+                {% for message in messages %}
+                    <div class="message message-{{ message.tags|default:'info' }}">{{ message }}</div>
+                {% endfor %}
+            </section>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
+

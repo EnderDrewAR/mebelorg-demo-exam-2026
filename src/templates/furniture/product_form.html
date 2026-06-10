@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — МебельОрг{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div>
+        <a class="back-link" href="{% url 'product_list' %}">← Назад к товарам</a>
+        <h1>{{ title }}</h1>
+        {% if product %}<p>ID товара: <strong>{{ product.pk }}</strong></p>{% endif %}
+    </div>
+</div>
+<form method="post" enctype="multipart/form-data" class="edit-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-grid">
+        {% for field in form %}
+            <div class="field {% if field.name == 'description' or field.name == 'name' %}field-wide{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+    </div>
+    <div class="form-actions">
+        <button class="button button-primary" type="submit">Сохранить</button>
+        <a class="button button-secondary" href="{% url 'product_list' %}">Отмена</a>
+    </div>
+</form>
+{% endblock %}
+

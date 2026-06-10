@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Заказы — МебельОрг{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div>
+        <a class="back-link" href="{% url 'product_list' %}">← Назад к товарам</a>
+        <h1>Заказы</h1>
+    </div>
+    {% if is_app_admin %}
+        <a class="button button-primary" href="{% url 'order_create' %}">Добавить заказ</a>
+    {% endif %}
+</div>
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Артикулы и количество</th>
+                <th>Дата заказа</th>
+                <th>Дата выдачи</th>
+                <th>Пункт выдачи</th>
+                <th>Клиент</th>
+                <th>Код</th>
+                <th>Статус</th>
+                {% if is_app_admin %}<th>Действия</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.pk }}</td>
+                    <td>
+                        {% for item in order.items.all %}
+                            <span class="order-item">{{ item.product.article }} × {{ item.quantity }}</span>
+                        {% endfor %}
+                    </td>
+                    <td>{{ order.order_date|date:"d.m.Y" }}</td>
+                    <td>{{ order.delivery_date|date:"d.m.Y" }}</td>
+                    <td>{{ order.pickup_point.address }}</td>
+                    <td>{{ order.customer.get_full_name }}</td>
+                    <td>{{ order.pickup_code }}</td>
+                    <td>{{ order.status.name }}</td>
+                    {% if is_app_admin %}
+                        <td class="table-actions">
+                            <a href="{% url 'order_update' order.pk %}">Изменить</a>
+                            <a class="danger-link" href="{% url 'order_delete' order.pk %}">Удалить</a>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% empty %}
+                <tr><td colspan="9">Заказы отсутствуют.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

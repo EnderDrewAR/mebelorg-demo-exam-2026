@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — МебельОрг{% endblock %}
+{% block content %}
+<section class="confirm-card">
+    <h1>{{ title }}</h1>
+    <p>Вы действительно хотите удалить {{ object_name }}? Операцию нельзя отменить.</p>
+    <form method="post" class="form-actions">
+        {% csrf_token %}
+        <button class="button button-danger" type="submit">Удалить</button>
+        <a class="button button-secondary" href="{% url cancel_url %}">Отмена</a>
+    </form>
+</section>
+{% endblock %}
+
