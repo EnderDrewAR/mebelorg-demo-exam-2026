@@ -21,6 +21,25 @@ function Check-Command {
     }
 }
 
+function Test-PostgresConnection {
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+
+    try {
+        & $psql `
+            -h $DbHost `
+            -p $DbPort `
+            -U $DbUser `
+            -d postgres `
+            -v ON_ERROR_STOP=1 `
+            -tAc "SELECT 1;" *> $null
+        return $LASTEXITCODE -eq 0
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 # PostgreSQL 16 обычно устанавливается в эту папку
 $psql = "C:\Program Files\PostgreSQL\16\bin\psql.exe"
 if (-not (Test-Path $psql)) {
@@ -50,8 +69,19 @@ $env:PGPASSWORD = $DbPassword
 $env:PGCLIENTENCODING = "UTF8"
 
 Write-Host "Checking PostgreSQL..." -ForegroundColor Cyan
-& $psql -h $DbHost -p $DbPort -U $DbUser -d postgres -v ON_ERROR_STOP=1 -tAc "SELECT 1;" *> $null
-Check-Command "Cannot connect to PostgreSQL."
+if (-not (Test-PostgresConnection)) {
+    Write-Host "The default PostgreSQL password 'postgres' was not accepted." -ForegroundColor Yellow
+    $securePassword = Read-Host "Enter the password for PostgreSQL user 'postgres'" -AsSecureString
+    $DbPassword = [System.Net.NetworkCredential]::new("", $securePassword).Password
+    $env:PGPASSWORD = $DbPassword
+
+    if (-not (Test-PostgresConnection)) {
+        Write-Host "Cannot connect to PostgreSQL. Check the password and service." -ForegroundColor Red
+        exit 1
+    }
+}
+
+Write-Host "PostgreSQL connection succeeded." -ForegroundColor Green
 
 $databaseExists = & $psql `
     -h $DbHost `

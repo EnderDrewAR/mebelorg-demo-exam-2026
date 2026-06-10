@@ -18,7 +18,8 @@
 Откройте PowerShell в корне проекта. Один раз выполните установку:
 
 ```powershell
-Set-ExecutionPolicy -Scope Process Bypass
+Set-ExecutionPolicy -Scope Process Bypass -Force
+Unblock-File .\setup.ps1
 .\setup.ps1
 ```
 
@@ -29,6 +30,10 @@ Set-ExecutionPolicy -Scope Process Bypass
 - сервер `localhost`;
 - порт `5432`;
 - база `furniture_demo`.
+
+Если пароль пользователя `postgres` отличается от `postgres`, установщик
+попросит ввести действующий пароль. Введенные символы в PowerShell не
+отображаются.
 
 Установочный скрипт автоматически:
 
